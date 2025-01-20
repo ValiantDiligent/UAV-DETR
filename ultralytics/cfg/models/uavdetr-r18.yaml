@@ -42,6 +42,6 @@ head:
   - [[-1, 10], 1, Concat, [1]] # 25
   - [-1, 3, RepC3, [256, 0.5]] # 26
   
-  - [[20, -1], 1, SemanticAlignmenCalibration, []] # 27 (P2综合的加强)
+  - [[20, -1], 1, SemanticAlignmenCalibration, []] # 27 
 
   - [[27, 23, 26], 1, RTDETRDecoder, [nc, 256, 300, 4, 8, 3]]  # RTDETRDecoder(P3, P4, P5)
