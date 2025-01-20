@@ -1,5 +1,22 @@
-# 忽略所有 __pycache__ 目录
+# Python bytecode files
+*.pyc
+*.pyo
+*.pyd
 __pycache__/
 
-# 忽略所有 .pyc 文件
-*.pyc
+# Virtual environment
+venv/
+env/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# PyCharm or other IDEs configuration files
+.idea/
+.vscode/
+
+# MacOS system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
