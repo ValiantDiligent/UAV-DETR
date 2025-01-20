@@ -3,7 +3,7 @@
 *.pyo
 *.pyd
 __pycache__/
-
+runs/
 # Virtual environment
 venv/
 env/
