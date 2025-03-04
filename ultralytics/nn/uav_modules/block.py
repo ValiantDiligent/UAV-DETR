@@ -143,19 +143,20 @@ class ImprovedFFTKernel(nn.Module):
         self.dw_33 = nn.Conv2d(dim, dim, kernel_size=ker, padding=pad, stride=1, groups=dim)
         self.dw_11 = nn.Conv2d(dim, dim, kernel_size=1, padding=0, stride=1, groups=dim)
 
-        self.act = nn.ReLU()
+        self.act = nn.SiLU()
 
         # 改进后的 SCA 部分
         self.conv1x1 = nn.Conv2d(dim, dim, kernel_size=1, padding=0, stride=1, groups=1, bias=True)
         self.conv3x3 = nn.Conv2d(dim, dim, kernel_size=3, padding=1, stride=1, groups=dim, bias=True)
         self.conv5x5 = nn.Conv2d(dim, dim, kernel_size=5, padding=2, stride=1, groups=dim, bias=True)
 
-        self.pool = nn.AdaptiveAvgPool2d((1, 1))
+        # self.pool = nn.AdaptiveAvgPool2d((1, 1))
 
         self.fac_conv = nn.Conv2d(dim, dim, kernel_size=1, padding=0, stride=1, groups=1, bias=True)
         self.fac_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.ffm = FFM(dim)
 
+        #通道注意力
         self.channel_attention = nn.Sequential(
             nn.Conv2d(dim, dim // 4, kernel_size=1),
             nn.ReLU(),
@@ -164,33 +165,35 @@ class ImprovedFFTKernel(nn.Module):
         )
 
     def forward(self, x):
+        #1*1 进行通道融合
         out = self.in_conv(x)
-
-        # fca 部分
+        #公式1开始
+        # 池化后1*1卷积 
         x_att = self.fac_conv(self.fac_pool(out))
         x_fft = torch.fft.fft2(out, norm='backward')
         x_fft = x_att * x_fft
         x_fca = torch.fft.ifft2(x_fft, dim=(-2, -1), norm='backward')
         x_fca = torch.abs(x_fca)
-
-        # sca 部分
+        #公式1结束
+        
+        #公式2
         x_sca1 = self.conv1x1(x_fca)
         x_sca2 = self.conv3x3(x_fca)
         x_sca3 = self.conv5x5(x_fca)
         x_sca = x_sca1 + x_sca2 + x_sca3
+        #公式2结束
 
         # 使用通道注意力机制
         channel_weights = self.channel_attention(x_att)
         x_sca = x_sca * channel_weights
 
-        # fgm 部分
+        #FF的公式
         x_sca = self.ffm(x_sca)
 
-        # 最终融合
+        # 最终融合 公式4
         out = x + self.dw_33(out) + self.dw_11(out) + x_sca
         out = self.act(out)
         return self.out_conv(out)
-
 
 class MFFF(nn.Module): 
     def __init__(self, dim, e=0.25):
@@ -206,7 +209,20 @@ class MFFF(nn.Module):
         ok_branch, identity = torch.split(self.cv1(x), [c1, c2], dim=1)
         return self.cv2(torch.cat((self.m(ok_branch), identity), 1))
 
+class ADown(nn.Module): # Downsample x2分支
+    def __init__(self, c1, c2):  
+        super().__init__()
+        self.c = c2 // 2
+        self.cv1 = Conv(c1 // 2, self.c, 3, 2, 1)
+        self.cv2 = Conv(c1 // 2, self.c, 1, 1, 0)
 
+    def forward(self, x):
+        x = torch.nn.functional.avg_pool2d(x, 2, 1, 0, False, True)
+        x1,x2 = x.chunk(2, 1)
+        x1 = self.cv1(x1)
+        x2 = torch.nn.functional.max_pool2d(x2, 3, 2, 1)
+        x2 = self.cv2(x2)
+        return torch.cat((x1, x2), 1)
 
 class FrequencyFocusedDownSampling(nn.Module):  # Downsample x2分支 with parallel FGM
     def __init__(self, c1, c2):  
@@ -242,7 +258,7 @@ class FrequencyFocusedDownSampling(nn.Module):  # Downsample x2分支 with paral
         return torch.cat((x1, x2), 1)
     
     
-class SemanticAlignmenCalibration(nn.Module):  # 新的模块名称，更具描述性
+class SemanticAlignmenCalibration(nn.Module):  # 
     def __init__(self, inc):
         super(SemanticAlignmenCalibration, self).__init__()
         hidden_channels = inc[0]

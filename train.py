@@ -19,16 +19,17 @@ if __name__ == '__main__':
     # 构建相对路径
     yaml_path = '/mnt/RTdetr/RTDETR-main/dataset/dataset_visdrone/data.yaml'
     check_path(yaml_path)
-    model = RTDETR('ultralytics/cfg/models/uavdetr-r50.yaml')
+    # model = RTDETR('ultralytics/cfg/models/uavdetr-r50.yaml')
+    model = RTDETR('/mnt/RTdetr/UAV_DETR/ultralytics/cfg/models/uavdetr-r50.yaml')
     model.train(data=str(yaml_path),
                 cache=False,
                 imgsz=640,
-                epochs=350,
+                epochs=400,
                 batch=4,
                 workers=8,
                 device='0',
                 # resume='', # last.pt path
                 project='runs/train',
                 name='exp',
-                patience = 40,
+                patience = 40, # early stopping patience
                 )
