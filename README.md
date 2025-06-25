@@ -51,4 +51,8 @@ This is the official implementation of the paper:
 - Ubuntu 20.04
 
 ---
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=ValiantDiligent/UAV-DETR&type=Date)](https://www.star-history.com/#ValiantDiligent/UAV-DETR&Date)
+
 如果仍有疑问，请邮件联系：zhanghx23@m.fudan.edu.cn
