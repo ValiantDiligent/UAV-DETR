@@ -4,6 +4,9 @@
 This is the official implementation of the paper:
 - ​**[UAV-DETR: Efficient End-to-End Object Detection for Unmanned Aerial Vehicle Imagery](https://arxiv.org/abs/2501.01855)**
 
+ ⚠️ Status:  Unmaintained
+ 
+ As my personal professional focus and research interests have shifted towards Large Language Models , I find myself with limited time and energy to properly maintain this project. Therefore, I have decided to pause active  archive this repository.
 ## 🚀 Updates
 - ​**[2024.10]**​ Release UAV-DETR-R50, UAV-DETR-R18.
 - ​**[2025.01]**​ The initial version of the paper has been uploaded to arXiv.
